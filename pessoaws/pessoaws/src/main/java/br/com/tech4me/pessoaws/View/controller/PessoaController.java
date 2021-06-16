@@ -62,8 +62,4 @@ public class PessoaController {
     public ResponseEntity<Pessoa> atualizarPessoa(@PathVariable String id, @RequestBody Pessoa pessoa) {
         return new ResponseEntity<>(servico.atualizarPessoa(id, pessoa), HttpStatus.OK);
     }
-
-
-
-    
 }
