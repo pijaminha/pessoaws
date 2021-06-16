@@ -3,6 +3,7 @@ package br.com.tech4me.pessoaws.View.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,8 +46,10 @@ public class PessoaController {
 
     @PostMapping
     public ResponseEntity<PessoaResponse> criarUmaPessoa(@RequestBody PessoaRequest pessoa) {
-        
-        return new ResponseEntity<>(servico.criarPessoa(PessoaDTO), HttpStatus.CREATED);
+        ModelMapper mapa = new ModelMapper();
+        PessoaDTO pessoaDTO = mapa.map(pessoa, PessoaDTO.class);
+        pessoaDTO = servico.criarPessoa(pessoaDTO);
+        return new ResponseEntity<>(mapa.map(pessoaDTO, PessoaResponse.class) , HttpStatus.CREATED);
     }
 
     @DeleteMapping(value="/{id}")
