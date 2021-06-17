@@ -2,6 +2,7 @@ package br.com.tech4me.pessoaws.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +18,12 @@ public class PessoaServiceImpl implements PessoaService {
     private PessoaRepository repositorio;
 
     @Override
-    public List<Pessoa> obterTodos() {
-        return repositorio.findAll();
+    public List<PessoaDTO> obterTodos() {
+        List<Pessoa> pessoas = repositorio.findAll();
+
+        return pessoas.stream()
+        .map(pessoa -> new ModelMapper().map(pessoa, PessoaDTO.class))
+        .collect(Collectors.toList());
     }
 
     @Override
@@ -36,19 +41,23 @@ public class PessoaServiceImpl implements PessoaService {
     }
 
     @Override
-    public Optional<Pessoa> obterPorId(String id) {
+    public Optional<PessoaDTO> obterPorId(String id) {
         Optional<Pessoa> pes = repositorio.findById(id);
 
         if (pes.isPresent()) {
-            return Optional.of(pes.get());
-        }
+            return Optional.of(new ModelMapper().map(pes.get(), PessoaDTO.class));
+        }else
         return Optional.empty();
     }
 
     @Override
-    public Pessoa atualizarPessoa(String id, Pessoa pessoa) {
+    public PessoaDTO atualizarPessoa(String id, PessoaDTO pessoa) {
+        ModelMapper mapa = new ModelMapper();
+        Pessoa pes = mapa.map(pessoa, Pessoa.class);
         pessoa.setId(id);
-        return repositorio.save(pessoa);
+        pes = repositorio.save(pes);
+        
+        return mapa.map(pes, PessoaDTO.class);
     }
 
   

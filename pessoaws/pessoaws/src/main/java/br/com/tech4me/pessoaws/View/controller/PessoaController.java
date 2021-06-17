@@ -2,6 +2,7 @@ package br.com.tech4me.pessoaws.View.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.tech4me.pessoaws.Shared.PessoaDTO;
 import br.com.tech4me.pessoaws.View.Model.PessoaRequest;
 import br.com.tech4me.pessoaws.View.Model.PessoaResponse;
-import br.com.tech4me.pessoaws.model.Pessoa;
 import br.com.tech4me.pessoaws.service.PessoaService;
 
 
@@ -30,16 +30,22 @@ public class PessoaController {
     PessoaService servico;
 
     @GetMapping
-    public ResponseEntity<List<Pessoa>> obterTodasAsPessoas() {
-        return new ResponseEntity<>(servico.obterTodos(), HttpStatus.OK);
+    public ResponseEntity<List<PessoaResponse>> obterTodasAsPessoas() {
+        ModelMapper mapa = new ModelMapper();
+        List<PessoaDTO> pessoaDTO = servico.obterTodos();
+        List<PessoaResponse> pesResponse = pessoaDTO.stream()
+        .map(pes -> mapa.map(pes, PessoaResponse.class))
+        .collect(Collectors.toList());
+
+        return new ResponseEntity<>(pesResponse, HttpStatus.OK);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Pessoa> obterUmaPessoa(@PathVariable String id){
-        Optional<Pessoa> pes = servico.obterPorId(id);
+    public ResponseEntity<PessoaResponse> obterUmaPessoa(@PathVariable String id){
+        Optional<PessoaDTO> pes = servico.obterPorId(id);
 
         if (pes.isPresent()) {
-            return new ResponseEntity<>(pes.get(), HttpStatus.FOUND);
+            return new ResponseEntity<>(new ModelMapper().map(pes.get(), PessoaResponse.class), HttpStatus.FOUND);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
@@ -59,7 +65,11 @@ public class PessoaController {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Pessoa> atualizarPessoa(@PathVariable String id, @RequestBody Pessoa pessoa) {
-        return new ResponseEntity<>(servico.atualizarPessoa(id, pessoa), HttpStatus.OK);
+    public ResponseEntity<PessoaResponse> atualizarPessoa(@PathVariable String id, @RequestBody PessoaRequest pessoa) {
+        ModelMapper mapa = new ModelMapper();
+        PessoaDTO pessoaDTO = mapa.map(pessoa, PessoaDTO.class);
+        pessoaDTO = servico.atualizarPessoa(id, pessoaDTO);
+        return new ResponseEntity<>(mapa.map(pessoaDTO, PessoaResponse.class) , HttpStatus.OK);
+
     }
 }
