@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,7 +53,7 @@ public class PessoaController {
     }
 
     @PostMapping
-    public ResponseEntity<PessoaResponse> criarUmaPessoa(@RequestBody PessoaRequest pessoa) {
+    public ResponseEntity<PessoaResponse> criarUmaPessoa(@RequestBody @Valid PessoaRequest pessoa) {
         ModelMapper mapa = new ModelMapper();
         PessoaDTO pessoaDTO = mapa.map(pessoa, PessoaDTO.class);
         pessoaDTO = servico.criarPessoa(pessoaDTO);
@@ -65,7 +67,7 @@ public class PessoaController {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<PessoaResponse> atualizarPessoa(@PathVariable String id, @RequestBody PessoaRequest pessoa) {
+    public ResponseEntity<PessoaResponse> atualizarPessoa(@PathVariable String id, @RequestBody @Valid PessoaRequest pessoa) {
         ModelMapper mapa = new ModelMapper();
         PessoaDTO pessoaDTO = mapa.map(pessoa, PessoaDTO.class);
         pessoaDTO = servico.atualizarPessoa(id, pessoaDTO);
